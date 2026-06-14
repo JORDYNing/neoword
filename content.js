@@ -44,9 +44,9 @@
     return card;
   }
 
-  // Position the card above selRect (falls back to below if no room).
-  // The arrow tip is aligned to the horizontal center of the selection.
-  function placeCard(card, selRect) {
+  // Position the card above the range (falls back to below if no room).
+  // Re-reads the range rect here so async scroll during API call doesn't drift the position.
+  function placeCard(card, range) {
     const ARROW_H = 9;  // matches border-top/bottom height in CSS
     const GAP = 4;      // gap between arrow tip and selection edge
     const EDGE = 8;     // minimum distance from viewport edges
@@ -59,6 +59,9 @@
 
     const cw = card.offsetWidth;
     const ch = card.offsetHeight;
+
+    // Re-read here (not at mouseup) so scroll during API call is accounted for
+    const selRect = range.getBoundingClientRect();
 
     // Center card horizontally over selection, clamped to viewport
     let left = selRect.left + selRect.width / 2 - cw / 2;
@@ -101,7 +104,7 @@
     });
   }
 
-  async function lookupAndShow(word, selRect) {
+  async function lookupAndShow(word, range) {
     try {
       const res = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
@@ -120,7 +123,7 @@
 
       removeCard();
       const card = buildCard(entry.word || word, meaning.partOfSpeech || '', def);
-      placeCard(card, selRect);
+      placeCard(card, range);
       activeCard = card;
 
       // Wire up save with full data
@@ -146,11 +149,9 @@
       if (!text || /[\s]/.test(text) || text.length < 2 || text.length > 45) return;
       if (!/^[a-zA-Z'-]+$/.test(text)) return;
 
-      const range = sel.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-      if (!rect.width) return;
+      const range = sel.getRangeAt(0).cloneRange();
 
-      lookupAndShow(text, rect);
+      lookupAndShow(text, range);
     }, 0);
   });
 

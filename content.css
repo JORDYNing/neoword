@@ -3,6 +3,7 @@
 .nw-card {
   /* reset page styles so the card looks consistent everywhere */
   all: initial;
+  display: block;   /* all:initial resets display to inline; fix it */
   position: fixed;
   z-index: 2147483647;
   width: 340px;
