@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "NeoWord",
+  "version": "1.0.0",
+  "description": "Select a word to see its English definition and save it to your vocabulary notebook.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://api.dictionaryapi.dev/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
+}
