@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeoWord — Local vocabulary</title>
+  <link rel="stylesheet" href="notebook.css" />
+</head>
+<body>
+  <div class="nb-page">
+    <header class="nb-header">
+      <div class="nb-header-left">
+        <p class="nb-breadcrumb"><a href="#">NeoWord</a></p>
+        <h1 class="nb-title">Local vocabulary</h1>
+        <p class="nb-subtitle">English definitions saved quietly while you read.</p>
+      </div>
+      <div class="nb-actions">
+        <button class="nb-btn nb-btn-primary" id="importBtn">Import</button>
+        <button class="nb-btn nb-btn-primary" id="exportBtn">Export</button>
+        <button class="nb-btn nb-btn-danger"  id="clearBtn">Clear</button>
+      </div>
+    </header>
+
+    <div class="nb-toolbar">
+      <div class="nb-search-wrap">
+        <svg class="nb-search-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="#aaa" stroke-width="1.6"/>
+          <line x1="13" y1="13" x2="17" y2="17" stroke="#aaa" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input class="nb-search" id="searchInput" type="search" placeholder="Search words or definitions" />
+      </div>
+      <div class="nb-filters">
+        <button class="nb-filter active" data-filter="all">All</button>
+        <button class="nb-filter" data-filter="learning">Learning</button>
+        <button class="nb-filter" data-filter="mastered">Mastered</button>
+      </div>
+      <span class="nb-stats" id="stats"></span>
+    </div>
+
+    <div class="nb-body">
+      <!-- Review card panel -->
+      <aside class="nb-review-panel" id="reviewPanel">
+        <p class="nb-review-label">Review</p>
+        <h2 class="nb-review-word" id="reviewWord"></h2>
+        <p class="nb-review-def" id="reviewDef"></p>
+        <div class="nb-review-meta">
+          <div><span class="nb-meta-label">Seen</span><span class="nb-meta-value" id="reviewSeen"></span></div>
+          <div><span class="nb-meta-label">Source</span><span class="nb-meta-value" id="reviewSource"></span></div>
+        </div>
+        <div class="nb-review-btns">
+          <button class="nb-status-btn active" data-status="learning">Learning</button>
+          <button class="nb-status-btn" data-status="mastered">Mastered</button>
+        </div>
+      </aside>
+
+      <!-- Word list -->
+      <main class="nb-list" id="wordList"></main>
+    </div>
+  </div>
+
+  <!-- Import file input (hidden) -->
+  <input type="file" id="importFile" accept=".json" style="display:none" />
+
+  <script src="notebook.js"></script>
+</body>
+</html>

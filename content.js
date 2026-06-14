@@ -41,11 +41,6 @@
 
     card.querySelector('.nw-close').addEventListener('click', removeCard);
 
-    card.querySelector('.nw-save-btn').addEventListener('click', () => {
-      saveWord(word, pos, definition);
-      card.querySelector('.nw-saved-msg').textContent = 'Saved to local notebook';
-    });
-
     return card;
   }
 
@@ -88,12 +83,21 @@
     card.style.visibility = '';
   }
 
-  function saveWord(word, pos, definition) {
+  function saveWord(word, pos, definition, example) {
     chrome.storage.local.get({ notebook: [] }, ({ notebook }) => {
-      if (!notebook.find(e => e.word === word)) {
-        notebook.push({ word, pos, definition, savedAt: Date.now() });
-        chrome.storage.local.set({ notebook });
+      const existing = notebook.find(e => e.word === word);
+      if (existing) {
+        existing.seenCount = (existing.seenCount || 1) + 1;
+      } else {
+        notebook.push({
+          word, pos, definition, example: example || '',
+          savedAt: Date.now(),
+          status: 'learning',
+          seenCount: 1,
+          source: 'dictionaryapi.dev'
+        });
       }
+      chrome.storage.local.set({ notebook });
     });
   }
 
@@ -108,13 +112,22 @@
 
       const entry = data[0];
       const meaning = entry.meanings?.[0];
-      const def = meaning?.definitions?.[0]?.definition;
+      const defObj = meaning?.definitions?.[0];
+      const def = defObj?.definition;
       if (!def) return;
+
+      const example = defObj?.example || '';
 
       removeCard();
       const card = buildCard(entry.word || word, meaning.partOfSpeech || '', def);
       placeCard(card, selRect);
       activeCard = card;
+
+      // Wire up save with full data
+      card.querySelector('.nw-save-btn').addEventListener('click', () => {
+        saveWord(entry.word || word, meaning.partOfSpeech || '', def, example);
+        card.querySelector('.nw-saved-msg').textContent = 'Saved to local notebook';
+      }, { once: true });
     } catch {
       // Silently ignore network/parse errors
     }
