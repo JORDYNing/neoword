@@ -51,39 +51,49 @@
     const GAP = 4;      // gap between arrow tip and selection edge
     const EDGE = 8;     // minimum distance from viewport edges
 
-    // Measure card dimensions while hidden
+    // Append off-screen and hidden so it can't flash in the wrong spot.
     card.style.visibility = 'hidden';
     card.style.position = 'fixed';
+    card.style.left = '-9999px';
     card.style.top = '-9999px';
     document.body.appendChild(card);
 
-    const cw = card.offsetWidth;
-    const ch = card.offsetHeight;
+    // Measure and position on the next frame. A freshly-appended element is not
+    // guaranteed to be laid out yet, so reading offsetWidth/offsetHeight here can
+    // return 0 — which would pin the card's top-left corner to the word instead of
+    // centering it above. Waiting one frame guarantees real dimensions.
+    requestAnimationFrame(() => {
+      // Card may have been removed (e.g. user clicked away) before this fires.
+      if (!card.isConnected) return;
 
-    // Re-read here (not at mouseup) so scroll during API call is accounted for
-    const selRect = range.getBoundingClientRect();
+      const cw = card.offsetWidth;
+      const ch = card.offsetHeight;
 
-    // Center card horizontally over selection, clamped to viewport
-    let left = selRect.left + selRect.width / 2 - cw / 2;
-    left = Math.max(EDGE, Math.min(left, window.innerWidth - cw - EDGE));
+      // Re-read here (not at mouseup) so scroll during API call is accounted for
+      const selRect = range.getBoundingClientRect();
 
-    // Arrow tip position relative to card left edge
-    const arrowIdeal = selRect.left + selRect.width / 2 - left;
-    const arrowLeft = Math.max(20, Math.min(arrowIdeal, cw - 20));
-    card.querySelector('.nw-arrow').style.left = arrowLeft + 'px';
+      // Center card horizontally over selection, clamped to viewport
+      let left = selRect.left + selRect.width / 2 - cw / 2;
+      left = Math.max(EDGE, Math.min(left, window.innerWidth - cw - EDGE));
 
-    // Try to place card above the selection
-    let top = selRect.top - ch - ARROW_H - GAP;
+      // Arrow tip position relative to card left edge
+      const arrowIdeal = selRect.left + selRect.width / 2 - left;
+      const arrowLeft = Math.max(20, Math.min(arrowIdeal, cw - 20));
+      card.querySelector('.nw-arrow').style.left = arrowLeft + 'px';
 
-    if (top < EDGE) {
-      // Not enough room above — place below instead
-      top = selRect.bottom + ARROW_H + GAP;
-      card.classList.add('nw-below');
-    }
+      // Place the card directly above the selection
+      let top = selRect.top - ch - ARROW_H - GAP;
 
-    card.style.left = left + 'px';
-    card.style.top = top + 'px';
-    card.style.visibility = '';
+      if (top < EDGE) {
+        // Not enough room above — place below instead
+        top = selRect.bottom + ARROW_H + GAP;
+        card.classList.add('nw-below');
+      }
+
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
+      card.style.visibility = '';
+    });
   }
 
   function saveWord(word, pos, definition, example) {
